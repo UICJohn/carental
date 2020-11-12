@@ -2,14 +2,14 @@ class Users::RegistrationsController < DeviseTokenAuth::RegistrationsController
   def create
     build_resource
 
-    unless @resource.present?
+    if @resource.blank?
       raise DeviseTokenAuth::Errors::NoResourceDefinedError,
             "#{self.class.name} #build_resource does not define @resource,"\
             ' execution stopped.'
     end
 
     if @resource.save
-      yield @resource if block_given?      
+      yield @resource if block_given?
 
       @token = @resource.create_token
       @resource.save!
