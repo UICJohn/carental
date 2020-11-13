@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :store do
     name { 'Budget' }
-    city {City.find_by(name: 'Shengzhen')}
+    city { City.find_by(name: 'Shengzhen') }
 
     # before(:create) do |state, evaluator|
     #   if state.country_id.blank?

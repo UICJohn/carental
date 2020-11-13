@@ -2,10 +2,8 @@ class Vehicle < ApplicationRecord
   belongs_to :model
   belongs_to :store
   has_many   :orders
-  
-  def brand
-    model.brand
-  end
+
+  delegate :brand, to: :model
 
   # def decrease_cache_amount(dates)
   #   File.open(Rails.root.join("app", "scripts", "decreament.lua")) do |file|
@@ -32,5 +30,4 @@ class Vehicle < ApplicationRecord
   # def key(date)
   #   "Vehicle:#{self.id}:#{date.to_s}:amount"
   # end
-
 end

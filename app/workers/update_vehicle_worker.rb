@@ -6,7 +6,7 @@ class UpdateVehicleWorker
   def perform(vehicle_id)
     vehicle = Vehicle.find_by(id: vehicle_id)
 
-    return unless order.present?
+    return if order.blank?
 
     begin
       vehicle.with_lock do

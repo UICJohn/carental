@@ -18,13 +18,13 @@ class Payment < ApplicationRecord
   def check_order
     case order.status
     when 'closed'
-      errors.add(:base, "Order has already been closed")
+      errors.add(:base, 'Order has already been closed')
     when 'paid'
-      errors.add(:base, "Your order has been paid. Do not resubmit the payment")
+      errors.add(:base, 'Your order has been paid. Do not resubmit the payment')
     when 'cancelled'
-      errors.add(:base, "Your order has been cancelled")
+      errors.add(:base, 'Your order has been cancelled')
     when 'refund'
-      errors.add(:base, "Your order has been proccessed")
+      errors.add(:base, 'Your order has been proccessed')
     end
   end
 end
