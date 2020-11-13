@@ -4,6 +4,8 @@ class CreateVehicles < ActiveRecord::Migration[6.0]
       t.bigint  :model_id
       t.bigint  :store_id
 
+      t.integer  :lock_version
+
       t.decimal :price, :precision => 10, :scale => 2
 
       t.integer :amount, default: 0

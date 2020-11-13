@@ -51,3 +51,5 @@ gem 'jbuilder'
 gem 'redis-rails'
 
 gem 'devise_token_auth'
+
+gem 'sidekiq'

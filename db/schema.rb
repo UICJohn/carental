@@ -46,18 +46,21 @@ ActiveRecord::Schema.define(version: 2020_11_12_160158) do
 
   create_table "orders", force: :cascade do |t|
     t.bigint "user_id"
-    t.bigint "payment_id"
     t.bigint "vehicle_id"
+    t.integer "lock_version"
+    t.integer "status", default: 0
     t.decimal "amount", precision: 10, scale: 2
-    t.datetime "start_at"
-    t.datetime "expires_at"
+    t.datetime "starts_at", precision: 6, null: false
+    t.datetime "expires_at", precision: 6, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "payments", force: :cascade do |t|
     t.decimal "amount"
-    t.integer "type", default: 0
+    t.bigint "order_id"
+    t.bigint "user_id"
+    t.integer "platform", default: 0
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -93,6 +96,7 @@ ActiveRecord::Schema.define(version: 2020_11_12_160158) do
   create_table "vehicles", force: :cascade do |t|
     t.bigint "model_id"
     t.bigint "store_id"
+    t.integer "lock_version"
     t.decimal "price", precision: 10, scale: 2
     t.integer "amount", default: 0
     t.string "color"

@@ -3,4 +3,7 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable, :validatable
   include DeviseTokenAuth::Concerns::User
+
+  has_many :orders
+  has_many :payments
 end

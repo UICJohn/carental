@@ -3,12 +3,14 @@ class CreateOrders < ActiveRecord::Migration[6.0]
     create_table :orders do |t|
 
       t.bigint  :user_id
-      t.bigint  :payment_id
       t.bigint  :vehicle_id
+      t.integer  :lock_version
+
+      t.integer :status, default: 0
 
       t.decimal  :amount, :precision => 10, :scale => 2
-      t.datetime :start_at
-      t.datetime :expires_at
+      t.datetime :starts_at, precision: 6, null: false
+      t.datetime :expires_at, precision: 6, null: false
 
       t.timestamps
     end

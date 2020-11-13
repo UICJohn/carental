@@ -3,7 +3,10 @@ class CreatePayments < ActiveRecord::Migration[6.0]
     create_table :payments do |t|
       t.decimal :amount
 
-      t.integer :type, default: 0
+      t.bigint  :order_id
+      t.bigint  :user_id
+
+      t.integer :platform, default: 0
 
       t.timestamps
     end
