@@ -7,6 +7,9 @@ class V1::OrdersController < ApplicationController
 
   def show
     @order = current_user.orders.find_by(id: params[:id])
+    if @order.blank?
+      render json: {}
+    end
   end
 
   def create
@@ -19,6 +22,11 @@ class V1::OrdersController < ApplicationController
 
   def destroy
     @order = current_user.orders.find_by(id: params[:id])
+
+    if @order.blank?
+      return render json: {}
+    end
+
     if @order.outdate?
       render json: { status: 'failed', errors: 'Sorry, we cannot cancel your order' }
     else

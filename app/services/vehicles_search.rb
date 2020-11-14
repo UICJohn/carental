@@ -24,7 +24,7 @@ class VehiclesSearch
 
   def vehicle_available?(vehicle)
     (starts_at.to_date...expires_at.to_date).each do |date|
-      orders_count = Order.where(vehicle: vehicle).where('starts_at <= :date AND expires_at >= :date', { date: date.beginning_of_day }).count
+      orders_count = Order.not_fullfilled.where(vehicle: vehicle).where('starts_at <= :date AND expires_at >= :date', { date: date.beginning_of_day }).count
       return false if vehicle.amount <= orders_count
     end
 

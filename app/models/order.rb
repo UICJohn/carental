@@ -70,7 +70,7 @@ class Order < ApplicationRecord
       end
     end
 
-    if user.orders.where('status = ? or status = ?', 0, 1).where("(starts_at >= :starts_at AND starts_at < :expires_at) OR
+    if user.orders.not_fullfilled.where("(starts_at >= :starts_at AND starts_at < :expires_at) OR
           (starts_at <= :starts_at AND expires_at >= :starts_at)", { starts_at: starts_at, expires_at: expires_at }).present?
 
       errors.add(:base, 'You have another order')
