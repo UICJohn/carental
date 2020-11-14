@@ -1,4 +1,7 @@
 class Order < ApplicationRecord
+  extend OversoldMaster::ClassMethods
+  include OversoldMaster::INstanceMethods
+
   enum status: { pending: 0, paid: 1, closed: 2, cancelled: 3, refund: 4 }
   has_one :payment
   belongs_to :user
@@ -35,13 +38,30 @@ class Order < ApplicationRecord
   def self.initialize_order_for(user, options)
     order = new(options.to_h.merge({ user: user }))
 
-    if order.valid?
-      order.amount = ((order.expires_at.beginning_of_day - order.starts_at.end_of_day) / 3600 / 24).ceil * order.vehicle.price
-      order.save
-      CheckPaymentWorker.perform_in(10.minutes, order.id)
-    end
+    begin
+      dates = (options[:starts_at]...options[:expires_at]).collect{ |datetime|  datetime.to_date }
 
-    order
+      reserve!(dates) do |result|
+        if result.positive?
+          if order.valid?
+            order.amount = ((order.expires_at.beginning_of_day - order.starts_at.end_of_day) / 3600 / 24).ceil * order.vehicle.price
+            order.save
+            CheckPaymentWorker.perform_in(10.minutes, order.id)
+          end
+        else
+          order.errors.add(:amount, 'Vehicle out of stock')
+        end
+      end
+
+    rescue Date::Error
+
+      order.errors.add(:base, "invalid date")
+
+    ensure
+
+      return order
+
+    end
   end
 
   def cancel!

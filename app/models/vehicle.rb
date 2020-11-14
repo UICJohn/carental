@@ -5,13 +5,13 @@ class Vehicle < ApplicationRecord
 
   delegate :brand, to: :model
 
-  # def decrease_cache_amount(dates)
-  #   File.open(Rails.root.join("app", "scripts", "decreament.lua")) do |file|
-  #     script = file.read()
+  def decrease_cache_amount(dates)
+    File.open(Rails.root.join("app", "scripts", "decreament.lua")) do |file|
+      script = file.read()
 
-  #     $redis.eval(script, dates.map{|date| key(date)}, amount_left(dates))
-  #   end
-  # end
+      $redis.eval(script, dates.map{|date| key(date)}, amount_left(dates))
+    end
+  end
 
   # def amount_left(dates)
   #   dates.map do |date|
@@ -19,15 +19,22 @@ class Vehicle < ApplicationRecord
   #   end
   # end
 
-  # def increase_cache_amount
-  #   $redis.incr(key)
-  # end
+  def increase_cache_amount
+    $redis.incr(key)
+  end
 
-  # def cache_amount
-  #   $redis.get(key)
-  # end
+  def cache_amount(dates)
+    dates.map{ |date| }
+    
+  end
 
-  # def key(date)
-  #   "Vehicle:#{self.id}:#{date.to_s}:amount"
-  # end
+  private
+
+  def daily_cache_amount(date)
+    $redis.get key(date.to_s)
+  end
+
+  def key(postfix)
+    "Vehicle:#{self.id}:amount:#{postfix}"
+  end
 end
