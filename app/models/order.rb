@@ -14,29 +14,19 @@ class Order < ApplicationRecord
   def self.initialize_order_for(user, options)
     order = new(options.to_h.merge({ user: user }))
 
-    begin
-      dates = (options[:starts_at].to_date...options[:expires_at].to_date).collect{ |date|  date }
-      order.vehicle.reserve!(dates) do |result|
-        unless result.negative?
-          if order.valid?
-            order.amount = ((order.expires_at.beginning_of_day - order.starts_at.end_of_day) / 3600 / 24).ceil * order.vehicle.price
-            order.save
-            CheckPaymentWorker.perform_in(10.minutes, order.id)
-          end
-        else
-          order.errors.add(:amount, 'Vehicle out of stock')
+    order.vehicle.reserve!(options[:starts_at], options[:expires_at]) do |result|
+      unless result.negative?
+        if order.valid?
+          order.amount = ((order.expires_at.beginning_of_day - order.starts_at.end_of_day) / 3600 / 24).ceil * order.vehicle.price
+          order.save
+          CheckPaymentWorker.perform_in(10.minutes, order.id)
         end
+      else
+        order.errors.add(:amount, 'Vehicle out of stock')
       end
-
-    rescue Date::Error
-
-      order.errors.add(:base, "invalid date")
-
-    rescue StandardError => e
-      raise e
-    ensure
-      return order
     end
+
+    order
   end
 
   def cancel!
