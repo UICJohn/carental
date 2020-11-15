@@ -9,7 +9,7 @@ RSpec.describe 'V1::OrdersController', type: :request do
   end
 
   describe '#index' do
-    it 'should return users\' order' do
+    it 'should return users\' orders' do
       order1 = create :order, vehicle: @v2, starts_at: 2.days.since,  expires_at: 6.days.since,  user: @user, amount: 8400
       order2 = create :order, vehicle: @v1, starts_at: 7.days.since,  expires_at: 10.days.since, user: @user, amount: 8400
       order3 = create :order, vehicle: @v2, starts_at: 12.days.since, expires_at: 14.days.since, user: create(:user), amount: 8400
@@ -37,7 +37,7 @@ RSpec.describe 'V1::OrdersController', type: :request do
     end
   end
 
-  describe '#index' do
+  describe '#show' do
     it 'should return users\' order' do
       order1 = create :order, vehicle: @v2, starts_at: 2.days.since,  expires_at: 6.days.since,  user: @user, amount: 8400
       order2 = create :order, vehicle: @v1, starts_at: 7.days.since,  expires_at: 10.days.since, user: @user, amount: 8400
@@ -134,8 +134,6 @@ RSpec.describe 'V1::OrdersController', type: :request do
       expect do
         post '/v1/orders', params: { vehicle_id: @v1.id, starts_at: 3.days.since, expires_at: 4.days.since }, headers:  @user.create_new_auth_token
       end.to change(Order, :count).by 1
-
-      body = JSON.parse(response.body)
     end
 
     it 'should not create order if out of stock' do
@@ -152,6 +150,10 @@ RSpec.describe 'V1::OrdersController', type: :request do
       body = JSON.parse(response.body)
 
       expect(body).to eq({ 'status' => 'failed', 'errors' => ['Vehicle out of stock at 2020-11-17', 'Vehicle out of stock at 2020-11-18'] })
+
+      expect do
+        post '/v1/orders', params: { vehicle_id: @v2.id, starts_at: 13.days.since, expires_at: 16.days.since }, headers: @user.create_new_auth_token
+      end.to change(Order, :count).by 1
     end
 
     it 'should not create order if expires_at before starts_at' do
