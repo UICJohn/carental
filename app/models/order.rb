@@ -1,8 +1,5 @@
 class Order < ApplicationRecord
-  extend OversoldMaster::ClassMethods
-  include OversoldMaster::INstanceMethods
-
-  enum status: { pending: 0, paid: 1, closed: 2, cancelled: 3, refund: 4 }
+  enum status: { pending: 0, paid: 1, closed: 2, cancelled: 3, refunded: 4 }
   has_one :payment
   belongs_to :user
   belongs_to :vehicle
@@ -11,38 +8,16 @@ class Order < ApplicationRecord
   validate :check_date, on: :create
   validate :check_orders, on: :create
 
-  scope :not_fullfilled, -> { where('status = ? or status = ?', 0, 1) }
-
-  # def self.initialize_order_for(user, options)
-  #   transaction do
-
-  #     order = new(options.to_h.merge({ user: user }))
-
-  #     cache_amount = order.vehicle.decrease_cache_amount
-  #     unless cache_amount.negative?
-  #       if order.valid?
-  #         order.amount = ((order.expires_at - order.starts_at)/3600/24).ceil * order.vehicle.price
-  #         order.save
-  #         CheckPaymentWorker.perform_in(10.minutes, order.id)
-  #         # UpdateVehicleWorker.perform_async(order.vehicle_id)
-  #       end
-
-  #       order
-  #     else
-  #       order.errors.add(:amount, 'Vehicle out of stock')
-  #       order
-  #     end
-  #   end
-  # end
+  scope :not_fullfilled, -> { where('(status = ? OR status = ?) AND expires_at >= ?', 0, 1, Time.zone.now) }
+  scope :fullfilled, -> { where("(status && ?) and expires_at < ?", '{2, 3, 4}', Time.zone.now)}
 
   def self.initialize_order_for(user, options)
     order = new(options.to_h.merge({ user: user }))
 
     begin
-      dates = (options[:starts_at]...options[:expires_at]).collect{ |datetime|  datetime.to_date }
-
-      reserve!(dates) do |result|
-        if result.positive?
+      dates = (options[:starts_at].to_date...options[:expires_at].to_date).collect{ |date|  date }
+      order.vehicle.reserve!(dates) do |result|
+        unless result.negative?
           if order.valid?
             order.amount = ((order.expires_at.beginning_of_day - order.starts_at.end_of_day) / 3600 / 24).ceil * order.vehicle.price
             order.save
@@ -57,10 +32,10 @@ class Order < ApplicationRecord
 
       order.errors.add(:base, "invalid date")
 
+    rescue StandardError => e
+      raise e
     ensure
-
       return order
-
     end
   end
 

@@ -1,4 +1,6 @@
 class Vehicle < ApplicationRecord
+  include OversoldMaster
+
   belongs_to :model
   belongs_to :store
   has_many   :orders
