@@ -1,9 +1,11 @@
+set :stage, :staging
+
 set :port, 22
 # set :pty,             true
 set :user, 'deploy'
 set :deploy_via, :remote_cache
 set :use_sudo, false
-set :branch, 'develop'
+set :branch, 'master'
 
 server '142.93.15.159',
        roles: %i[web app db sidekiq],
